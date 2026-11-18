@@ -1,0 +1,1443 @@
+# GRAMCONNECT – MASTER PROJECT REQUIREMENTS AND DEVELOPMENT PROMPT
+
+## 1. Project Title
+
+**GramConnect – Telangana Digital Village Governance, Public Grievance, Development and Fund Monitoring Platform**
+
+## 2. Project Vision
+
+I want to develop a large-scale, state-wide digital governance platform for Telangana that connects citizens, village administrations, ward representatives, Sarpanches, mandal officers, district officers, state government departments and authorized government administrators through one integrated application.
+
+The main purpose of GramConnect is to digitize village-level public problems, administrative workflows, government department operations, development projects, fund requests, public expenditure monitoring and government accountability.
+
+This must not be developed as a simple complaint registration website.
+
+It should function as a complete hierarchical governance and public development management system where a problem reported in a village can be tracked from the village level through mandal and district administrations to the authorized state government authority whenever required.
+
+Every problem should have a continuous history, responsible officers, status updates, evidence, decisions and financial records.
+
+The platform should improve transparency, accountability, administrative efficiency and public participation.
+
+## 3. Geographical Coverage – Telangana State
+
+The application must support all 33 districts of Telangana, their mandals, villages, Gram Panchayats and wards.
+
+The geographical hierarchy should be:
+
+Telangana State
+→ Districts
+→ Mandals
+→ Villages / Gram Panchayats
+→ Wards
+
+Each geographical location must have a unique identifier and parent-child relationship in the database.
+
+The application must allow authorized administrators to configure:
+
+- Districts
+- Mandals
+- Villages
+- Gram Panchayats
+- Wards
+- Administrative boundary changes
+- Officer jurisdiction assignments
+
+Do not create separate applications for each district.
+
+Develop one centralized Telangana-wide platform with separate jurisdiction-based dashboards.
+
+Each village should be able to manage its own problems, and mandal and district administrations should be able to monitor relevant problems from their geographical areas.
+
+## 4. Main Stakeholders and Application Dashboards
+
+Create separate dashboards for the following stakeholders.
+
+### A. Citizen Dashboard
+
+Citizens should be able to:
+
+- Register and log in.
+- Submit public complaints.
+- Upload photos, videos and supporting documents.
+- Select problem categories.
+- Automatically identify or select their village and location.
+- Track their own complaints.
+- View complaint status and permitted progress updates.
+- Receive notifications.
+- View public village development projects.
+- View approved public fund and expenditure information.
+- View public announcements.
+- Submit feedback about completed work and public services.
+- Review eligible representatives and public service performance.
+- Manage their own profiles.
+- View officially published government schemes.
+- Check scheme eligibility information.
+- View their own permitted scheme application and ration-related records.
+
+Citizens must not access another citizen's private account or complaint.
+
+### B. Ward Representative Dashboard
+
+Ward representatives should:
+
+- View complaints from their assigned ward.
+- Verify reported problems.
+- Record inspection details.
+- Forward issues to the Sarpanch or authorized village officer.
+- Monitor assigned tasks.
+- View ward development information.
+- Submit ward-level reports.
+- Track pending and completed issues.
+- View authorized government scheme and ration-related complaints from their ward.
+- Assist in beneficiary verification where officially authorized.
+
+They must not access unrelated wards or villages.
+
+### C. Sarpanch Dashboard
+
+The Sarpanch should:
+
+- View authorized village-wide complaints.
+- Monitor ward representatives.
+- Verify village-level problems.
+- Assign or coordinate village-level work.
+- Monitor village development projects.
+- View fund requests, sanctioned amounts and permitted expenditure records.
+- Coordinate with mandal officers.
+- Escalate unresolved village problems.
+- Monitor field-worker progress.
+- Review citizen feedback.
+- Generate village development reports.
+- Monitor village-level government scheme implementation.
+- View authorized beneficiary and ration distribution summaries.
+- Monitor government welfare-related complaints.
+
+### D. Village-Level Officer Dashboard
+
+Village-level officers should:
+
+- View authorized village problems.
+- Verify issues.
+- Assign tasks to field workers.
+- Update administrative decisions.
+- Prepare estimates and supporting documents.
+- Create fund requests where necessary.
+- Forward unresolved issues to the relevant mandal department.
+- Monitor work progress and completion.
+- Maintain village-level administrative records.
+- Manage authorized government scheme-related verification.
+- Maintain permitted beneficiary and public distribution records.
+- Forward scheme and ration-related complaints to the responsible department.
+
+### E. Mandal Department Smart Module Dashboard
+
+Each mandal should have department-specific modules.
+
+Examples:
+
+- Water Supply Department
+- Roads and Infrastructure Department
+- Electricity Department
+- Sanitation Department
+- Education Department
+- Health Department
+- Agriculture and Irrigation Department
+- Government Welfare and Schemes Department
+- Public Distribution System / Ration Department
+
+Mandal officers should:
+
+- View relevant complaints escalated from villages within their assigned mandal.
+- View mandal-level problems.
+- Filter by village and department.
+- Verify problems.
+- Assign field workers.
+- Update progress.
+- Prepare cost estimates.
+- Create fund requests.
+- Recommend projects to district authorities.
+- Escalate issues that cannot be resolved at mandal level.
+- Monitor pending tasks and overdue issues.
+- Manage authorized scheme-related applications and verification.
+- Monitor ration-related complaints and distribution records within their permissions.
+
+They must not access unrelated mandals or departments.
+
+### F. District Department Smart Module Dashboard
+
+Each district should have its own District Problem Board and department-specific dashboards.
+
+District officers should:
+
+- View relevant problems escalated from mandals within their assigned district.
+- View authorized district-level issues.
+- Filter by mandal, village, department and problem category.
+- Review mandal reports.
+- Verify technical details.
+- Review cost estimates.
+- Assign district-level field teams where authorized.
+- Recommend or create fund requests.
+- Monitor development projects.
+- Track allocations and expenditures within their permissions.
+- Escalate unresolved matters to authorized state government authorities.
+- Generate district-level reports.
+- Monitor district-wide government scheme implementation.
+- Review authorized ration distribution and beneficiary reports.
+- Monitor scheme-related complaints and unresolved applications.
+
+The district board should consolidate relevant information from its mandals while protecting private citizen information.
+
+### G. Mandal Head Officer Dashboard
+
+Mandal-level head officers should:
+
+- Monitor authorized department activities across their mandal.
+- Review pending issues.
+- Monitor department response times.
+- Review fund requests and recommendations.
+- Coordinate between departments.
+- Monitor escalations to district level.
+- Generate mandal-level reports.
+- Monitor government welfare and ration department performance within their jurisdiction.
+
+### H. District Head Officer Dashboard
+
+District-level head officers should:
+
+- Monitor authorized department operations across the district.
+- Review mandal performance.
+- Monitor district-wide problems and development projects.
+- Review financial recommendations.
+- Coordinate with department officers.
+- Escalate major unresolved matters to the state.
+- Generate district development and accountability reports.
+- Monitor government scheme implementation and ration-related performance.
+
+### I. Field Worker Dashboard
+
+Field workers should:
+
+- Log in using their authorized worker accounts.
+- View only assigned work orders.
+- View necessary problem descriptions and locations.
+- Receive task deadlines and instructions.
+- Update task status.
+- Upload before-and-after photos.
+- Upload completion evidence.
+- Report obstacles.
+- Request additional materials or support.
+- Submit work completion information.
+
+Field workers must not access unrelated complaints, citizen accounts, financial administration or officer dashboards.
+
+### J. Central Government Admin Portal
+
+Create one centralized Government Administration Portal with clearly separated administrative responsibilities.
+
+Its sub-roles should include:
+
+1. Super Administrator
+2. Government Administrator
+3. Access and Permission Manager
+4. Department Configuration Administrator
+5. Fund Oversight Administrator
+6. Audit Administrator
+
+The portal should support:
+
+**User Administration**
+
+- Verify government employee accounts.
+- Verify ward representatives and Sarpanches.
+- Approve or reject registration requests.
+- Create, activate, suspend and deactivate accounts.
+- Manage official Work IDs.
+- Handle transfers and jurisdiction changes.
+
+**Role and Permission Management**
+
+- Create roles.
+- Assign permissions.
+- Configure department access.
+- Configure geographical access.
+- Approve access requests.
+- Revoke permissions.
+- Maintain permission history.
+
+**Geographical Administration**
+
+- Manage all 33 districts.
+- Manage mandals and villages.
+- Manage ward mappings.
+- Assign officer jurisdictions.
+
+**Department Administration**
+
+- Configure departments.
+- Configure department-specific Smart Modules.
+- Assign officers.
+- Configure complaint-routing rules.
+
+**Government Oversight**
+
+- Monitor authorized state-wide problems.
+- Review escalated issues.
+- Review district and mandal reports.
+- Monitor pending government decisions.
+- Review development proposals.
+
+**Fund Oversight**
+
+- Review authorized funding requests.
+- Record approval or rejection decisions.
+- Monitor sanctioned amounts and allocations.
+- Monitor expenditure reports.
+- Maintain financial audit records.
+
+**Government Schemes and Ration Administration**
+
+- Configure government scheme categories.
+- Manage officially verified scheme information.
+- Configure eligibility information and required documents.
+- Manage scheme publication and updates.
+- Monitor authorized beneficiary statistics.
+- Monitor ration distribution summaries.
+- Manage department permissions.
+- Monitor scheme-related complaints and escalations.
+
+**System Administration**
+
+- Manage application configuration.
+- Manage system security.
+- Monitor server health.
+- Manage backups.
+- Monitor application activity.
+
+System administrators must not automatically receive unrestricted access to private citizen information or authority to approve public expenditure.
+
+Every administrative sub-role must have permissions based on the principle of least privilege.
+
+## 5. Main Problem Categories
+
+Every complaint and development problem must be classified by department.
+
+Create the following categories.
+
+### 1. Water Supply
+
+- Drinking water shortage
+- Pipeline damage
+- Borewell problems
+- Water tank maintenance
+- Water quality issues
+
+### 2. Roads and Infrastructure
+
+- Damaged roads
+- Street construction
+- Bridges
+- Drainage construction
+- Public buildings
+
+### 3. Electricity
+
+- Streetlights
+- Damaged electric poles
+- Power supply infrastructure
+
+### 4. Sanitation
+
+- Garbage collection
+- Drainage cleaning
+- Waste disposal
+- Public hygiene
+
+### 5. Education
+
+- Government school infrastructure
+- School toilets
+- Classrooms
+- School facilities
+
+### 6. Health
+
+- Public health facilities
+- Government hospital infrastructure
+- Sanitation in health facilities
+
+### 7. Agriculture and Irrigation
+
+- Irrigation infrastructure
+- Agricultural water facilities
+- Canal problems
+
+### 8. Government Schemes and Welfare Services
+
+Create a dedicated category named:
+
+**Government Schemes & Welfare Services**
+
+This category must contain the following subcategories.
+
+**A. Central Government Schemes**
+
+- Central government welfare schemes.
+- Agriculture welfare schemes.
+- Housing schemes.
+- Employment schemes.
+- Health insurance schemes.
+- Student scholarship schemes.
+- Pension schemes.
+- Women and child welfare schemes.
+- Other centrally administered welfare schemes.
+
+**B. Telangana State Government Schemes**
+
+- Telangana state welfare schemes.
+- State financial assistance schemes.
+- Housing and development assistance.
+- Farmer welfare schemes.
+- Student welfare schemes.
+- Women welfare schemes.
+- Pension and social security schemes.
+- Other Telangana government schemes.
+
+**C. Government Scheme-Related Complaints**
+
+- Eligible beneficiary not receiving benefits.
+- Application pending for a long time.
+- Application rejected incorrectly.
+- Beneficiary details incorrect.
+- Eligible citizen missing from beneficiary list.
+- Delayed financial assistance.
+- Scholarship not received.
+- Pension not received.
+- Housing scheme application problems.
+- Scheme eligibility verification problems.
+- Other government welfare-related complaints.
+
+### 9. Ration and Public Distribution System (PDS)
+
+Create a dedicated subcategory for:
+
+**A. Ration Card Services**
+
+- New ration card registration.
+- Ration card corrections.
+- Family member addition.
+- Family member removal.
+- Ration card details verification.
+- Ration card eligibility problems.
+- Missing ration card records.
+
+**B. Monthly Ration Distribution**
+
+- Monthly ration entitlement.
+- Rice distribution.
+- Other ration items.
+- Monthly quantity allocated.
+- Actual quantity distributed.
+- Distribution date.
+- Remaining or undelivered quantity.
+- Village-wise ration distribution records.
+- Ration shop-wise distribution records.
+
+**C. Ration-Related Complaints**
+
+- Ration not received.
+- Insufficient ration quantity.
+- Incorrect ration quantity.
+- Ration shop irregularities.
+- Distribution delays.
+- Ration card not accepted.
+- Beneficiary missing from distribution records.
+- Other public distribution-related complaints.
+
+### 10. Other Government Public Services
+
+- Government financial assistance.
+- Pension-related problems.
+- Scholarship-related problems.
+- Government benefit application status.
+- Beneficiary verification.
+- Delayed government benefits.
+- Missing beneficiary records.
+- Other government service-related complaints.
+
+## 5.1 Government Schemes and Ration Management Dashboard
+
+Inside the new Government Schemes & Welfare Services category, create an integrated dashboard.
+
+This must be a module within the existing GramConnect application, not a separate application.
+
+The dashboard should contain the following sections.
+
+### A. Scheme Information Dashboard
+
+Display:
+
+- Total available government schemes.
+- Central government schemes.
+- Telangana state government schemes.
+- Active schemes.
+- Inactive schemes.
+- New scheme announcements.
+- Scheme eligibility information.
+- Required documents.
+- Application procedures.
+- Available benefits.
+- Application deadlines, where applicable.
+- Responsible government department.
+
+Citizens should be able to explore schemes and understand which schemes they may be eligible for.
+
+Only display officially verified scheme information.
+
+### B. Beneficiary Management Dashboard
+
+Display authorized beneficiary information:
+
+- Total registered beneficiaries.
+- Scheme-wise beneficiaries.
+- Village-wise beneficiaries.
+- Mandal-wise beneficiaries.
+- District-wise beneficiaries.
+- Applications submitted.
+- Applications approved.
+- Applications rejected.
+- Applications pending.
+- Beneficiary verification status.
+- Benefit distribution history.
+
+Maintain the following records where legally authorized:
+
+- Beneficiary name.
+- Beneficiary ID or application reference.
+- Village and ward.
+- Scheme name.
+- Department name.
+- Application date.
+- Eligibility status.
+- Verification status.
+- Application status.
+- Benefit distribution history.
+
+Protect personal and financial information through role-based access.
+
+### C. Ration Management Dashboard
+
+Create a dedicated ration management section.
+
+Display:
+
+- Total ration card records.
+- Active ration cards.
+- Pending ration card applications.
+- Ration card corrections.
+- Village-wise ration distribution.
+- Monthly ration allocation.
+- Monthly ration quantity distributed.
+- Ration distribution pending.
+- Ration shop-wise distribution records.
+- Ration-related complaints.
+- Resolved and pending ration complaints.
+
+Maintain the following records where authorized:
+
+- Ration card reference.
+- Beneficiary or household reference.
+- Village and ward.
+- Ration shop identification.
+- Monthly entitlement.
+- Rice quantity allocated.
+- Other ration items allocated.
+- Actual quantity distributed.
+- Distribution date.
+- Remaining quantity, where applicable.
+- Distribution status.
+
+### D. Government Scheme Application Tracking
+
+Citizens should be able to:
+
+- View published schemes.
+- Check eligibility criteria.
+- View required documents.
+- View application procedures.
+- Submit scheme-related complaints.
+- Track their own application reference and status where the service supports it.
+- Receive permitted status notifications.
+- View official announcements.
+
+Authorized officers should be able to:
+
+- Verify application details.
+- Update verification status.
+- Record administrative remarks.
+- Forward applications to the responsible department.
+- Update permitted processing stages.
+- Record approval or rejection decisions only where they have official authority.
+
+### E. Government Scheme and Ration Complaint Management
+
+Citizens should be able to register complaints related to:
+
+- Government benefits not received.
+- Eligible beneficiaries excluded.
+- Application delays.
+- Incorrect beneficiary information.
+- Pension delays.
+- Scholarship delays.
+- Ration quantity shortages.
+- Ration not distributed.
+- Irregular ration distribution.
+- Ration card problems.
+
+Each complaint must generate a unique Complaint ID and follow the existing GramConnect complaint workflow.
+
+Citizen
+→ Ward Representative
+→ Sarpanch / Village Officer
+→ Relevant Mandal Department Officer
+→ District Department Officer
+→ Authorized State Government Authority.
+
+The original Complaint ID must remain unchanged during forwarding and escalation.
+
+### F. Scheme and Ration Reports
+
+Generate:
+
+- Village-wise scheme reports.
+- Mandal-wise scheme reports.
+- District-wise scheme reports.
+- Scheme-wise beneficiary reports.
+- Application status reports.
+- Ration distribution reports.
+- Monthly ration reports.
+- Pending benefit reports.
+- Government welfare complaint reports.
+- Department performance reports.
+
+Use appropriate charts, summary cards, tables, search and filters.
+
+### G. Module Access and Permissions
+
+**Citizen**
+
+- View published schemes.
+- View public eligibility information.
+- View their own permitted application information.
+- View their own ration-related records where authorized.
+- Submit scheme and ration complaints.
+
+**Ward Representative**
+
+- View authorized ward-level complaints.
+- Assist with verification where authorized.
+- Monitor pending ward-level welfare complaints.
+
+**Sarpanch**
+
+- View authorized village-level scheme summaries.
+- Monitor welfare complaints.
+- Review village-level implementation reports.
+
+**Village Officer**
+
+- Verify authorized beneficiary records.
+- Update permitted verification information.
+- Forward complaints.
+
+**Mandal Officer**
+
+- Manage authorized mandal-level scheme and ration records.
+- Verify complaints.
+- Update permitted processing information.
+- Generate reports.
+
+**District Officer**
+
+- Monitor district-wide scheme and ration implementation.
+- Review mandal reports.
+- Monitor escalated complaints.
+
+**Central Government Admin**
+
+- Configure schemes.
+- Manage department settings.
+- Manage permissions.
+- Monitor authorized state-level reports.
+
+IMPORTANT:
+
+- Do not create separate applications or duplicate dashboards for this module.
+- Integrate it inside the existing Problem Categories area.
+- Use the existing GramConnect UI design system.
+- Reuse existing login, notification, complaint and role-management systems.
+- Do not invent government scheme eligibility rules or benefit amounts.
+- Use verified government information.
+- Do not assume access to government databases.
+- External government integrations must use officially authorized APIs or data sources.
+- Protect beneficiary details, ration records and personal information.
+
+Allow administrators to configure additional departments and categories.
+
+## 6. Main Complaint and Escalation Workflow
+
+The complete workflow must be hierarchical and traceable.
+
+Example: A citizen reports a drainage problem in a village.
+
+**Stage 1 – Citizen**
+
+- Citizen submits the complaint.
+- The system generates a unique Complaint ID.
+- The complaint is mapped to the village, mandal, district and relevant department.
+- The citizen receives a tracking reference.
+
+**Stage 2 – Ward / Village Administration**
+
+- The ward representative or authorized village officer reviews the complaint.
+- The problem is verified.
+- Photos and inspection evidence are added.
+- If it can be solved locally, work is assigned.
+- If it cannot be solved locally, it is forwarded to the relevant mandal department.
+
+**Stage 3 – Mandal Department**
+
+- The relevant Mandal Smart Module receives the issue.
+- The mandal officer reviews it.
+- The officer may assign field workers.
+- If funds are required, a fund request is prepared.
+- If the problem cannot be resolved at mandal level, it is escalated to the district.
+
+**Stage 4 – District Department**
+
+- The relevant District Smart Module receives the issue.
+- The district officer reviews the technical details and mandal recommendations.
+- The officer may assign authorized district-level teams.
+- The officer may recommend funding.
+- If the matter requires higher government authority, it is escalated to the state level.
+
+**Stage 5 – State Government / Government Admin**
+
+- Authorized state authorities review the escalated issue.
+- They record decisions.
+- They may approve, reject, return for clarification or forward it to the appropriate department.
+- Any financial approval must follow applicable government procedures.
+
+**Stage 6 – Implementation**
+
+- Authorized officers assign work.
+- Field workers update progress.
+- Evidence and expenditure records are submitted.
+- Officers verify completion.
+- The complaint or project is closed after the required verification.
+
+The same traceable administrative workflow should be applied to scheme and ration-related complaints, using the responsible government department and its authorized processing rules.
+
+IMPORTANT:
+
+- The original Complaint ID must remain unchanged throughout escalation.
+- Maintain complete complaint history.
+- Record every officer action.
+- Record every transfer and escalation.
+- Citizens should receive permitted status updates.
+- Do not allow an issue to disappear during administrative forwarding.
+
+## 7. District-Wise and Mandal-Wise Problem Boards
+
+Create a District Problem Board for each district.
+
+Each board should contain:
+
+- Total problems.
+- New complaints.
+- Pending verification.
+- Under investigation.
+- Assigned tasks.
+- Work in progress.
+- Fund requests pending.
+- Escalated problems.
+- Resolved problems.
+- Overdue problems.
+
+Provide filters:
+
+- Department
+- Mandal
+- Village
+- Category
+- Priority
+- Status
+- Date range
+
+Create similar Mandal Problem Boards that show relevant village-level problems within the assigned mandal.
+
+Officers should be able to identify:
+
+- Which villages have problems.
+- Which department is responsible.
+- Which officer is handling each issue.
+- Whether a field worker has been assigned.
+- Whether funding is required.
+- Whether the issue has been escalated.
+- How long the issue has been pending.
+
+Include authorized government scheme and ration-related complaints in the relevant mandal and district problem boards.
+
+Do not show private citizen details to users who do not have permission.
+
+## 8. Fund Request and Public Fund Management Module
+
+This must be a separate major module.
+
+The system should support:
+
+- Project creation.
+- Problem-to-project conversion where applicable.
+- Estimated project cost.
+- Requested amount.
+- Fund source or government scheme.
+- Village and project location.
+- Mandal recommendation.
+- District recommendation.
+- State-level approval records.
+- Sanctioned amount.
+- Allocation and release records.
+- Expenditure entries.
+- Bills and supporting documents.
+- Remaining balance.
+- Work progress.
+- Completion evidence.
+- Financial audit history.
+
+Fund request workflow:
+
+Village / Authorized Officer
+→ Mandal Department Officer
+→ District Department Officer
+→ Authorized State Government Authority
+
+The exact approval chain must be configurable according to government financial rules.
+
+If the mandal officer does not request funds:
+
+- Record the reason.
+- Allow local resolution if possible.
+- Flag overdue decisions.
+- Notify the relevant supervisory officer.
+- Escalate according to configured rules when required.
+
+Do not automatically assume every complaint needs money.
+
+GramConnect initially records and monitors fund requests, approvals, allocations and expenditure. It must not independently transfer government funds. Actual transactions require authorized government financial systems and approvals.
+
+## 9. Department-Specific Smart Modules
+
+Each department should have its own operational module.
+
+For example, Water Supply Smart Module:
+
+- Department dashboard.
+- Village-wise water problems.
+- Mandal-wise problems.
+- District-wise problem monitoring.
+- Complaint verification.
+- Field-worker assignment.
+- Work orders.
+- Cost estimation.
+- Fund requests.
+- Progress tracking.
+- Completion verification.
+- Department reports.
+
+The same basic architecture should be reusable for other departments, but their categories, workflows, forms and authorized actions should be configurable.
+
+The Government Schemes and Welfare Services and Public Distribution System modules must also follow this reusable department-specific architecture.
+
+## 10. Public Information and Transparency Module
+
+Citizens should be able to view approved public information related to their village, such as:
+
+- Village development projects.
+- Project status.
+- Approved project details.
+- Publicly disclosable fund information.
+- Sanctioned amounts.
+- Published expenditure summaries.
+- Work completion photos.
+- Public announcements.
+- Development progress.
+- Citizen feedback summaries.
+- Official government scheme information.
+- Scheme eligibility details.
+- Public welfare announcements.
+- Published ration distribution summaries where authorized.
+
+Provide separate village, mandal and district public information views where authorized information is published.
+
+Do not publish confidential documents, personal data, private complaints or restricted internal government records.
+
+## 11. Citizen Feedback and Representative Accountability
+
+Create a feedback and public accountability module.
+
+Citizens should be able to provide feedback about:
+
+- Complaint resolution.
+- Response time.
+- Public services.
+- Development work quality.
+- Communication.
+- Transparency.
+- Citizen satisfaction.
+
+Provide eligible review functionality for public representatives and service performance.
+
+Safeguards:
+
+- Verified citizen accounts.
+- Duplicate review prevention.
+- Moderation.
+- Appeal and grievance handling.
+- Prevention of fake reviews.
+- Protection of complainant identities.
+- Fair treatment of representatives.
+
+## 12. Registration and Authentication
+
+Create separate entry routes for:
+
+- Citizen Login
+- Government Officer Login
+- Ward Representative / Sarpanch Login
+- Field Worker Login
+- Central Admin Login
+
+**Citizen Registration**
+
+- Self-registration.
+- Registered mobile number verification.
+- Secure login and recovery.
+- Citizen profile management.
+
+**Government Employee Registration**
+
+- Full name.
+- Official Government Employee ID.
+- Designation.
+- Department.
+- Government administrative level.
+- District.
+- Mandal.
+- Village, where applicable.
+- Official contact details.
+- Verification documents.
+
+Government account requests must be verified by authorized administrators before activation.
+
+**Ward Representative / Sarpanch**
+
+- Official representative identity.
+- Designation.
+- Assigned ward or village.
+- Verification and approval.
+
+**Field Worker**
+
+- Worker ID.
+- Authorized department.
+- Assigned geographical area.
+- Supervising officer.
+- Account approval.
+
+**Central Admin**
+
+- Controlled privileged account creation.
+- Strong authentication.
+- Multi-factor authentication.
+- Secure account recovery.
+
+Never treat an ID number alone as sufficient authentication.
+
+Support account suspension, role changes, transfers, permission revocation and audit history.
+
+## 13. Security and Data Privacy – Critical Requirement
+
+The application must enforce strict data isolation.
+
+Use:
+
+- Role-Based Access Control (RBAC).
+- Attribute-Based Access Control (ABAC).
+- Record-level authorization.
+- Geographical jurisdiction checks.
+- Department-level isolation.
+- Assignment-level restrictions.
+- Audit logging.
+
+Access should be determined by:
+
+Role + Department + Jurisdiction + Permission + Record Scope.
+
+Examples:
+
+**Citizen**
+
+- Can view their own private complaints.
+- Can view published information for their village.
+- Cannot view another citizen's private complaint.
+- Cannot access officer dashboards.
+- Can view their own permitted scheme and ration information.
+
+**Ward Representative**
+
+- Can view authorized records in their assigned ward only.
+
+**Sarpanch**
+
+- Can view authorized village-wide records.
+
+**Mandal Officer**
+
+- Can view authorized department records within their assigned mandal.
+
+**District Officer**
+
+- Can view authorized department records within their assigned district.
+
+**Field Worker**
+
+- Can view only assigned work orders and necessary information.
+
+**Government Admin**
+
+- Can access authorized state-level records and oversight functions.
+
+**System Administrator**
+
+- Can manage technical configuration but does not automatically receive unrestricted access to private records.
+
+Security rules:
+
+- Never trust frontend-only access restrictions.
+- Enforce authorization on every backend API request.
+- Prevent access by changing URLs, IDs, request parameters or API endpoints.
+- Protect personal information.
+- Encrypt sensitive data where appropriate.
+- Maintain audit logs.
+- Use secure authentication and session management.
+- Apply least-privilege access.
+- Support access revocation and periodic permission review.
+
+Separate information into:
+
+1. Private citizen information.
+2. Internal administrative information.
+3. Publicly publishable information.
+
+These rules must also apply to government scheme applications, beneficiary records and ration distribution data.
+
+## 14. Notifications and Communication
+
+Create a notification system for:
+
+- Complaint registration.
+- Complaint verification.
+- Complaint assignment.
+- Complaint forwarding.
+- Escalation.
+- Fund request submission.
+- Fund approval or rejection.
+- Field-worker updates.
+- Work completion.
+- Citizen feedback.
+- Overdue tasks.
+- Administrative decisions.
+- Government scheme application updates where integrated.
+- Scheme-related complaint updates.
+- Ration-related complaint updates.
+- Important government scheme announcements.
+
+Support in-app notifications initially, with SMS, email and other integrations as later enhancements.
+
+## 15. Reports, Analytics and Monitoring
+
+Create analytics at village, mandal, district and state levels.
+
+Reports should include:
+
+- Total complaints.
+- Department-wise complaints.
+- Pending and resolved complaints.
+- Average resolution time.
+- Escalation counts.
+- Overdue tasks.
+- Officer response performance.
+- Field-worker performance.
+- Fund requests.
+- Sanctioned amounts.
+- Recorded expenditure.
+- Project completion progress.
+- Citizen feedback.
+- Government scheme applications.
+- Scheme-wise beneficiary statistics.
+- Ration distribution records.
+- Ration-related complaints.
+- Pending welfare benefits.
+
+Use permission-based dashboards so each officer sees only authorized information.
+
+## 16. Technology Stack
+
+Use the following architecture:
+
+**Frontend Web**
+
+- React
+- TypeScript
+- HTML
+- CSS
+- Responsive design
+
+**Mobile Application**
+
+- React Native
+- TypeScript
+- Android and iOS support
+
+**Backend**
+
+- Java
+- Spring Boot
+- Spring Security
+- REST APIs
+- Spring Data JPA / Hibernate
+
+**Database**
+
+- MySQL
+
+**Development and Testing**
+
+- VS Code or IntelliJ IDEA.
+- Git and GitHub.
+- Postman.
+- Database migration tools.
+- Automated testing.
+
+**Deployment**
+
+- Secure cloud or authorized government hosting.
+- HTTPS.
+- Database backups.
+- Monitoring.
+- Logging.
+- Disaster recovery.
+
+The web and mobile applications must use the same centralized backend APIs and database.
+
+## 17. Application Architecture
+
+Use a modular architecture.
+
+Suggested backend modules:
+
+1. Authentication and Identity Module.
+2. User and Profile Management.
+3. Role and Permission Management.
+4. Geographical Administration.
+5. Department Configuration.
+6. Complaint Management.
+7. Problem Verification.
+8. Escalation Management.
+9. Field-Worker Management.
+10. Work Order Management.
+11. Fund Request Management.
+12. Fund Approval and Tracking.
+13. Development Project Management.
+14. Public Information.
+15. Citizen Feedback.
+16. Notification Management.
+17. Reports and Analytics.
+18. Audit and Security.
+19. Central Administration.
+20. Government Schemes and Welfare Management.
+21. Beneficiary Management.
+22. Ration and Public Distribution Management.
+
+Each module must have clear responsibilities and APIs.
+
+Avoid placing all functionality into one large controller or one large service class.
+
+## 18. Database Design Requirements
+
+Design a normalized and scalable database.
+
+Important entities may include:
+
+- State
+- District
+- Mandal
+- Village
+- Gram Panchayat
+- Ward
+- Department
+- Department Category
+- User
+- Role
+- Permission
+- User Jurisdiction
+- User Department Assignment
+- Citizen Profile
+- Government Employee Profile
+- Complaint
+- Complaint Category
+- Complaint Attachment
+- Complaint History
+- Complaint Assignment
+- Verification Record
+- Escalation Record
+- Field Worker
+- Work Order
+- Work Progress
+- Fund Request
+- Fund Approval
+- Fund Allocation
+- Expenditure Record
+- Development Project
+- Project Attachment
+- Citizen Feedback
+- Notification
+- Audit Log
+- Government Scheme
+- Scheme Category
+- Scheme Eligibility
+- Scheme Required Document
+- Scheme Application Reference
+- Scheme Beneficiary Record
+- Beneficiary Verification
+- Scheme Benefit Distribution Record
+- Ration Card Reference
+- Ration Shop
+- Ration Entitlement
+- Monthly Ration Allocation
+- Ration Distribution Record
+- Ration Complaint
+
+Define primary keys, foreign keys, indexes, relationships and record-level authorization requirements.
+
+Use the original Complaint ID across all administrative stages.
+
+Do not store unnecessary sensitive beneficiary information. Use appropriate access controls and data minimization.
+
+## 19. Non-Functional Requirements
+
+The platform must support:
+
+- Scalability for state-wide usage.
+- Strong data security.
+- High availability.
+- Good performance.
+- Responsive web and mobile interfaces.
+- Telugu and English language support.
+- Accessibility.
+- Low-bandwidth usage where possible.
+- Maintainable modular code.
+- Reliable database backups.
+- Error handling.
+- Auditability.
+- Secure file uploads.
+- Data retention and privacy policies.
+- Monitoring and disaster recovery.
+
+## 20. Development Phases
+
+Do not attempt to develop all modules simultaneously.
+
+Follow this order:
+
+**Phase 1 – Requirement Analysis**
+
+- Finalize project objectives.
+- Identify stakeholders.
+- Define the government hierarchy.
+- Define user roles.
+- Define department responsibilities.
+- Define jurisdiction rules.
+- Define privacy and permissions.
+- Define workflows.
+- Complete the SRS.
+
+**Phase 2 – System Design**
+
+- Use-case diagrams.
+- Architecture diagrams.
+- Workflow diagrams.
+- Database ER diagram.
+- API design.
+- Role-permission matrix.
+- Security design.
+
+**Phase 3 – Backend Foundation**
+
+- Create Spring Boot project.
+- Configure MySQL.
+- Build geographical hierarchy.
+- Build authentication.
+- Build roles and permissions.
+- Build jurisdiction authorization.
+
+**Phase 4 – Core Complaint Workflow**
+
+- Citizen registration.
+- Complaint creation.
+- Ward and village verification.
+- Mandal escalation.
+- District escalation.
+- Work assignment.
+- Progress updates.
+- Completion verification.
+
+**Phase 5 – Department Smart Modules**
+
+- Department dashboards.
+- Department-specific categories.
+- Routing rules.
+- Officer workflows.
+- Field-worker operations.
+- Government Schemes and Welfare Services.
+- Beneficiary Management.
+- Ration and Public Distribution Management.
+- Scheme and ration complaint workflows.
+
+**Phase 6 – Fund and Development Modules**
+
+- Project records.
+- Fund requests.
+- Recommendations.
+- Approval tracking.
+- Allocation records.
+- Expenditure records.
+- Public transparency.
+
+**Phase 7 – Remaining Dashboards**
+
+- Citizen.
+- Ward Representative.
+- Sarpanch.
+- Village Officer.
+- Mandal Officer.
+- Mandal Head Officer.
+- District Officer.
+- District Head Officer.
+- Field Worker.
+- Government Admin.
+
+**Phase 8 – Frontend Integration**
+
+- Connect existing UI screens to backend APIs.
+- Implement authentication.
+- Implement role-based routing.
+- Implement dashboard data.
+- Implement forms, tables, filters and notifications.
+- Integrate the Government Schemes and Ration dashboard into the Problem Categories area.
+- Preserve the existing design system.
+
+**Phase 9 – Mobile Application**
+
+- Develop React Native application.
+- Reuse the same backend APIs.
+- Support citizen and authorized field workflows.
+
+**Phase 10 – Testing**
+
+- Unit testing.
+- API testing.
+- Integration testing.
+- Role-based access testing.
+- Geographical data isolation testing.
+- Security testing.
+- Performance testing.
+- End-to-end workflow testing.
+- Scheme and ration record access testing.
+- Complaint escalation testing.
+
+**Phase 11 – Deployment**
+
+- Production configuration.
+- Secure hosting.
+- Database backups.
+- Monitoring.
+- Documentation.
+- Maintenance.
+
+## 21. Important Development Instructions
+
+Before generating code:
+
+1. Understand the complete project.
+2. Analyze all requirements.
+3. Identify missing requirements and contradictions.
+4. Create the complete SRS.
+5. Design the administrative hierarchy.
+6. Design the role and permission matrix.
+7. Design the complaint and escalation workflows.
+8. Design the database ER diagram.
+9. Define backend modules and API contracts.
+10. Create a phased development roadmap.
+
+Do not immediately generate the entire application in one response.
+
+Do not create dummy functionality and claim that it is fully implemented.
+
+Do not redesign existing UI screens unnecessarily. Reuse the existing GramConnect design system and integrate it with real backend APIs.
+
+Develop one module at a time, test it, and then integrate it with the next module.
+
+Use clean code, reusable components, proper naming conventions, validation, exception handling, secure authorization and documentation.
+
+For every development phase, explain:
+
+- What needs to be created.
+- Why it is required.
+- Which folders and files are needed.
+- Which APIs are needed.
+- Which database tables are involved.
+- How to implement it.
+- How to test it.
+- What must be completed before moving to the next phase.
+
+## 22. Final Expected Outcome
+
+The final outcome should be one integrated Telangana-wide digital governance platform.
+
+A citizen should be able to report a village problem and track it.
+
+Village officials should be able to verify and solve local issues.
+
+Mandal officers should be able to manage relevant village problems across their mandal.
+
+District officers should be able to monitor and handle relevant mandal problems across their district.
+
+Department officers should be able to manage their respective Smart Modules.
+
+Fund requests should move through authorized administrative and financial approval processes.
+
+Unresolved issues should reach the appropriate higher government authority.
+
+Government administrators should have authorized state-level oversight.
+
+Field workers should execute assigned work and submit evidence.
+
+Citizens should be able to view approved public development information and provide feedback.
+
+Citizens should also be able to access officially published government scheme information, understand eligibility requirements, track permitted application information and report ration distribution or welfare-related problems.
+
+Authorized government officers should be able to monitor scheme implementation, beneficiary verification and ration distribution records within their jurisdiction.
+
+The entire system must maintain transparency, accountability, secure data isolation, traceable decisions and continuous complaint history.
+
+**The main objective: Every public problem should reach the responsible authority, every administrative action should be traceable, every approved development project should be monitorable, and every citizen should be able to track the progress of their own complaint.**

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Outer civic shield silhouette inside 66dp safe zone -->
+    <path
+        android:fillColor="#FFFDF7"
+        android:pathData="M54,24 L78,32 L78,53 C78,68 67,79 54,84 C41,79 30,68 30,53 L30,32 Z" />
+    <!-- Inner emerald shield cavity -->
+    <path
+        android:fillColor="#0B4F3A"
+        android:pathData="M54,28.5 L73.5,35 L73.5,52.5 C73.5,64.8 64.5,74.2 54,78.6 C43.5,74.2 34.5,64.8 34.5,52.5 L34.5,35 Z" />
+    <!-- Warm saffron rising sun & dome arch -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M54,37 C59.5,37 64,41.5 64,47 L44,47 C44,41.5 48.5,37 54,37 Z" />
+    <!-- Village / Panchayat pillars and base -->
+    <path
+        android:fillColor="#FFFDF7"
+        android:pathData="M41,49 L67,49 L67,52.5 L41,52.5 Z M43,54.5 L47.5,54.5 L47.5,65 L43,65 Z M51.75,54.5 L56.25,54.5 L56.25,65 L51.75,65 Z M60.5,54.5 L65,54.5 L65,65 L60.5,65 Z M40,66.5 L68,66.5 L68,70 L40,70 Z" />
+</vector>

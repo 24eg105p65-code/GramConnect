@@ -1,0 +1,632 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global safety net: deny everything by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Global Helpers ---
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Zero-DB-read bootstrapped admin check for list queries and admin bootstrapping
+    function isBootstrappedAdmin() {
+      return isSignedIn() &&
+             ('email' in request.auth.token) &&
+             ('email_verified' in request.auth.token) &&
+             request.auth.token.email == 'varunbanoth14@gmail.com' &&
+             request.auth.token.email_verified == true;
+    }
+
+    // Full admin check for single-doc reads and writes
+    function isAdmin() {
+      return isBootstrappedAdmin() ||
+             (isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    // Verified government/panchayat officer check (never used in allow list)
+    function isVerifiedOfficer() {
+      return isSignedIn() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.verificationStatus == 'VERIFIED' &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in [
+               'WARD_REP', 'SARPANCH', 'VILLAGE_OFFICER',
+               'MANDAL_OFFICER', 'MANDAL_HEAD',
+               'DISTRICT_OFFICER', 'DISTRICT_HEAD', 'GOVT_ADMIN'
+             ];
+    }
+
+    // --- Validation Helpers ---
+    function isValidAdmin(data) {
+      return data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128 &&
+             data.email is string && data.email.size() >= 3 && data.email.size() <= 160 &&
+             data.grantedBy is string && data.grantedBy.size() >= 1 && data.grantedBy.size() <= 160;
+    }
+
+    function isValidUserProfile(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 100 &&
+             data.email is string && data.email.size() >= 3 && data.email.size() <= 160 &&
+             data.role in ['CITIZEN', 'WARD_REP', 'SARPANCH', 'VILLAGE_OFFICER', 'MANDAL_OFFICER', 'MANDAL_HEAD', 'DISTRICT_OFFICER', 'DISTRICT_HEAD', 'FIELD_WORKER', 'GOVT_ADMIN'] &&
+             data.verificationStatus in ['VERIFIED', 'PENDING_VERIFICATION', 'SUSPENDED'] &&
+             (!('officialWorkId' in data) || (data.officialWorkId is string && data.officialWorkId.size() <= 64)) &&
+             (!('department' in data) || (data.department is string && data.department.size() <= 64)) &&
+             data.districtId is string && data.districtId.size() >= 1 && data.districtId.size() <= 80 &&
+             data.mandalId is string && data.mandalId.size() >= 1 && data.mandalId.size() <= 80 &&
+             data.villageId is string && data.villageId.size() >= 1 && data.villageId.size() <= 80 &&
+             data.wardId is string && data.wardId.size() >= 1 && data.wardId.size() <= 40 &&
+             data.preferredLang in ['EN', 'TE'];
+    }
+
+    function isValidRoleRequest(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.applicantName is string && data.applicantName.size() >= 1 && data.applicantName.size() <= 100 &&
+             data.requestedRole in ['WARD_REP', 'SARPANCH', 'VILLAGE_OFFICER', 'MANDAL_OFFICER', 'MANDAL_HEAD', 'DISTRICT_OFFICER', 'DISTRICT_HEAD', 'FIELD_WORKER', 'GOVT_ADMIN'] &&
+             data.officialWorkId is string && data.officialWorkId.size() >= 2 && data.officialWorkId.size() <= 64 &&
+             data.department is string && data.department.size() >= 2 && data.department.size() <= 64 &&
+             data.districtId is string && data.districtId.size() >= 1 && data.districtId.size() <= 80 &&
+             data.mandalId is string && data.mandalId.size() >= 1 && data.mandalId.size() <= 80 &&
+             data.villageId is string && data.villageId.size() >= 1 && data.villageId.size() <= 80 &&
+             data.wardId is string && data.wardId.size() >= 1 && data.wardId.size() <= 40 &&
+             data.status in ['PENDING', 'APPROVED', 'REJECTED'] &&
+             (!('reviewerNotes' in data) || (data.reviewerNotes is string && data.reviewerNotes.size() <= 500));
+    }
+
+    function isValidComplaint(data) {
+      return data.trackingCode is string && data.trackingCode.size() >= 5 && data.trackingCode.size() <= 40 &&
+             data.citizenId is string && data.citizenId.size() >= 1 && data.citizenId.size() <= 128 &&
+             data.citizenName is string && data.citizenName.size() >= 1 && data.citizenName.size() <= 100 &&
+             data.title is string && data.title.size() >= 3 && data.title.size() <= 140 &&
+             data.description is string && data.description.size() >= 5 && data.description.size() <= 2000 &&
+             data.category in ['WATER_SUPPLY', 'ROADS_INFRA', 'ELECTRICITY', 'SANITATION', 'EDUCATION', 'HEALTH', 'AGRICULTURE', 'WELFARE_SCHEMES', 'PDS_RATION', 'OTHER_SERVICES'] &&
+             data.subCategory is string && data.subCategory.size() >= 2 && data.subCategory.size() <= 100 &&
+             data.priority in ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] &&
+             data.status in ['SUBMITTED', 'WARD_VERIFYING', 'VILLAGE_LEVEL', 'MANDAL_ESCALATED', 'DISTRICT_ESCALATED', 'STATE_ESCALATED', 'WORK_ASSIGNED', 'IN_PROGRESS', 'COMPLETED_PENDING_VERIFY', 'RESOLVED', 'REJECTED'] &&
+             data.currentStage in ['CITIZEN', 'WARD', 'VILLAGE', 'MANDAL', 'DISTRICT', 'STATE', 'FIELD_WORKER', 'CLOSED'] &&
+             data.districtId is string && data.districtId.size() >= 1 && data.districtId.size() <= 80 &&
+             data.districtName is string && data.districtName.size() >= 1 && data.districtName.size() <= 80 &&
+             data.mandalId is string && data.mandalId.size() >= 1 && data.mandalId.size() <= 80 &&
+             data.mandalName is string && data.mandalName.size() >= 1 && data.mandalName.size() <= 80 &&
+             data.villageId is string && data.villageId.size() >= 1 && data.villageId.size() <= 80 &&
+             data.villageName is string && data.villageName.size() >= 1 && data.villageName.size() <= 80 &&
+             data.wardId is string && data.wardId.size() >= 1 && data.wardId.size() <= 40 &&
+             (!('latitude' in data) || data.latitude is number) &&
+             (!('longitude' in data) || data.longitude is number) &&
+             (!('assignedOfficerId' in data) || (data.assignedOfficerId is string && data.assignedOfficerId.size() <= 128)) &&
+             (!('assignedWorkerId' in data) || (data.assignedWorkerId is string && data.assignedWorkerId.size() <= 128)) &&
+             (!('assignedWorkerName' in data) || (data.assignedWorkerName is string && data.assignedWorkerName.size() <= 100)) &&
+             data.estimatedCostInr is int && data.estimatedCostInr >= 0 && data.estimatedCostInr <= 1000000000 &&
+             data.fundsRequired is bool &&
+             (!('fundRequestId' in data) || (data.fundRequestId is string && data.fundRequestId.size() <= 128)) &&
+             (!('latestActionNote' in data) || (data.latestActionNote is string && data.latestActionNote.size() <= 600)) &&
+             (!('aiSummary' in data) || (data.aiSummary is string && data.aiSummary.size() <= 1000)) &&
+             (!('photoUriString' in data) || (data.photoUriString is string && data.photoUriString.size() <= 500)) &&
+             data.authorizedUids is list && data.authorizedUids.size() >= 1 && data.authorizedUids.size() <= 20 &&
+             (data.authorizedUids[0] is string);
+    }
+
+    function isValidComplaintHistory(data) {
+      return data.complaintId is string && data.complaintId.size() >= 1 && data.complaintId.size() <= 128 &&
+             data.citizenId is string && data.citizenId.size() >= 1 && data.citizenId.size() <= 128 &&
+             data.actorId is string && data.actorId.size() >= 1 && data.actorId.size() <= 128 &&
+             data.actorName is string && data.actorName.size() >= 1 && data.actorName.size() <= 100 &&
+             data.actorRole is string && data.actorRole.size() >= 1 && data.actorRole.size() <= 50 &&
+             data.actionType is string && data.actionType.size() >= 1 && data.actionType.size() <= 60 &&
+             data.fromStage is string && data.fromStage.size() >= 1 && data.fromStage.size() <= 40 &&
+             data.toStage is string && data.toStage.size() >= 1 && data.toStage.size() <= 40 &&
+             data.remarks is string && data.remarks.size() >= 1 && data.remarks.size() <= 600 &&
+             data.authorizedUids is list && data.authorizedUids.size() >= 1 && data.authorizedUids.size() <= 20 &&
+             (data.authorizedUids[0] is string);
+    }
+
+    function isValidFundRequest(data) {
+      return data.complaintId is string && data.complaintId.size() >= 1 && data.complaintId.size() <= 128 &&
+             data.projectTitle is string && data.projectTitle.size() >= 3 && data.projectTitle.size() <= 140 &&
+             data.requesterId is string && data.requesterId.size() >= 1 && data.requesterId.size() <= 128 &&
+             data.requesterName is string && data.requesterName.size() >= 1 && data.requesterName.size() <= 100 &&
+             data.department is string && data.department.size() >= 2 && data.department.size() <= 64 &&
+             data.districtId is string && data.districtId.size() >= 1 && data.districtId.size() <= 80 &&
+             data.mandalId is string && data.mandalId.size() >= 1 && data.mandalId.size() <= 80 &&
+             data.villageId is string && data.villageId.size() >= 1 && data.villageId.size() <= 80 &&
+             data.fundSource is string && data.fundSource.size() >= 2 && data.fundSource.size() <= 100 &&
+             data.estimatedCostInr is int && data.estimatedCostInr >= 0 && data.estimatedCostInr <= 1000000000 &&
+             data.requestedAmountInr is int && data.requestedAmountInr >= 0 && data.requestedAmountInr <= 1000000000 &&
+             data.sanctionedAmountInr is int && data.sanctionedAmountInr >= 0 && data.sanctionedAmountInr <= 1000000000 &&
+             data.expenditureInr is int && data.expenditureInr >= 0 && data.expenditureInr <= 1000000000 &&
+             data.approvalStage in ['VILLAGE', 'MANDAL', 'DISTRICT', 'STATE'] &&
+             data.status in ['REQUESTED', 'MANDAL_RECOMMENDED', 'DISTRICT_RECOMMENDED', 'SANCTIONED', 'IN_EXECUTION', 'COMPLETED', 'REJECTED'] &&
+             (!('remarks' in data) || (data.remarks is string && data.remarks.size() <= 600)) &&
+             data.reviewerUids is list && data.reviewerUids.size() >= 1 && data.reviewerUids.size() <= 20 &&
+             (data.reviewerUids[0] is string);
+    }
+
+    function isValidPublicProject(data) {
+      return data.title is string && data.title.size() >= 3 && data.title.size() <= 140 &&
+             data.department is string && data.department.size() >= 2 && data.department.size() <= 64 &&
+             data.districtId is string && data.districtId.size() >= 1 && data.districtId.size() <= 80 &&
+             data.districtName is string && data.districtName.size() >= 1 && data.districtName.size() <= 80 &&
+             data.mandalName is string && data.mandalName.size() >= 1 && data.mandalName.size() <= 80 &&
+             data.villageName is string && data.villageName.size() >= 1 && data.villageName.size() <= 80 &&
+             data.sanctionedAmountInr is int && data.sanctionedAmountInr >= 0 && data.sanctionedAmountInr <= 1000000000 &&
+             data.expenditureInr is int && data.expenditureInr >= 0 && data.expenditureInr <= 1000000000 &&
+             data.progressPercent is int && data.progressPercent >= 0 && data.progressPercent <= 100 &&
+             data.status in ['PLANNED', 'IN_PROGRESS', 'COMPLETED'] &&
+             data.summary is string && data.summary.size() >= 3 && data.summary.size() <= 1000 &&
+             data.published is bool &&
+             data.createdBy is string && data.createdBy.size() >= 1 && data.createdBy.size() <= 128;
+    }
+
+    function isValidGovernmentScheme(data) {
+      return data.title is string && data.title.size() >= 3 && data.title.size() <= 160 &&
+             data.level in ['CENTRAL', 'TELANGANA_STATE'] &&
+             data.department is string && data.department.size() >= 2 && data.department.size() <= 80 &&
+             data.category is string && data.category.size() >= 2 && data.category.size() <= 80 &&
+             data.activeStatus in ['ACTIVE', 'INACTIVE'] &&
+             data.benefitsSummary is string && data.benefitsSummary.size() >= 3 && data.benefitsSummary.size() <= 1000 &&
+             data.eligibilityCriteria is string && data.eligibilityCriteria.size() >= 3 && data.eligibilityCriteria.size() <= 1000 &&
+             data.requiredDocuments is string && data.requiredDocuments.size() >= 3 && data.requiredDocuments.size() <= 600 &&
+             data.applicationProcess is string && data.applicationProcess.size() >= 3 && data.applicationProcess.size() <= 800 &&
+             (!('applicationDeadline' in data) || (data.applicationDeadline is string && data.applicationDeadline.size() <= 80)) &&
+             data.beneficiaryCount is int && data.beneficiaryCount >= 0 &&
+             data.published is bool;
+    }
+
+    function isValidRationSummary(data) {
+      return data.shopCode is string && data.shopCode.size() >= 2 && data.shopCode.size() <= 40 &&
+             data.districtId is string && data.districtId.size() >= 1 && data.districtId.size() <= 80 &&
+             data.mandalName is string && data.mandalName.size() >= 1 && data.mandalName.size() <= 80 &&
+             data.villageName is string && data.villageName.size() >= 1 && data.villageName.size() <= 80 &&
+             data.monthLabel is string && data.monthLabel.size() >= 3 && data.monthLabel.size() <= 40 &&
+             data.activeCards is int && data.activeCards >= 0 &&
+             data.allocatedRiceKg is int && data.allocatedRiceKg >= 0 &&
+             data.distributedRiceKg is int && data.distributedRiceKg >= 0 &&
+             data.pendingComplaints is int && data.pendingComplaints >= 0 &&
+             data.publicSummary is bool;
+    }
+
+    function isValidSchemeApplication(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.schemeId is string && data.schemeId.size() >= 1 && data.schemeId.size() <= 128 &&
+             data.schemeTitle is string && data.schemeTitle.size() >= 2 && data.schemeTitle.size() <= 160 &&
+             data.referenceNumber is string && data.referenceNumber.size() >= 4 && data.referenceNumber.size() <= 50 &&
+             data.villageName is string && data.villageName.size() >= 1 && data.villageName.size() <= 80 &&
+             data.verificationStatus in ['PENDING_VERIFICATION', 'VERIFIED', 'RETURNED'] &&
+             data.applicationStatus in ['SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'REJECTED'] &&
+             (!('remarks' in data) || (data.remarks is string && data.remarks.size() <= 500));
+    }
+
+    function isValidRationRecord(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.cardReference is string && data.cardReference.size() >= 4 && data.cardReference.size() <= 50 &&
+             data.shopCode is string && data.shopCode.size() >= 2 && data.shopCode.size() <= 40 &&
+             data.monthLabel is string && data.monthLabel.size() >= 3 && data.monthLabel.size() <= 40 &&
+             data.entitledRiceKg is int && data.entitledRiceKg >= 0 && data.entitledRiceKg <= 500 &&
+             data.receivedRiceKg is int && data.receivedRiceKg >= 0 && data.receivedRiceKg <= 500 &&
+             data.distributionStatus in ['PENDING', 'PARTIAL', 'DISTRIBUTED'];
+    }
+
+    function isValidNotification(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.title is string && data.title.size() >= 2 && data.title.size() <= 140 &&
+             data.message is string && data.message.size() >= 2 && data.message.size() <= 600 &&
+             data.relatedId is string && data.relatedId.size() <= 128 &&
+             data.notificationType is string && data.notificationType.size() >= 2 && data.notificationType.size() <= 50 &&
+             data.readStatus is bool;
+    }
+
+    function isValidFeedback(data) {
+      return data.citizenId is string && data.citizenId.size() >= 1 && data.citizenId.size() <= 128 &&
+             data.targetId is string && data.targetId.size() >= 1 && data.targetId.size() <= 128 &&
+             data.targetTitle is string && data.targetTitle.size() >= 2 && data.targetTitle.size() <= 140 &&
+             data.targetType in ['COMPLAINT_RESOLUTION', 'DEVELOPMENT_PROJECT', 'REPRESENTATIVE_SERVICE'] &&
+             data.districtName is string && data.districtName.size() >= 1 && data.districtName.size() <= 80 &&
+             data.villageName is string && data.villageName.size() >= 1 && data.villageName.size() <= 80 &&
+             data.rating is int && data.rating >= 1 && data.rating <= 5 &&
+             data.comment is string && data.comment.size() >= 3 && data.comment.size() <= 800 &&
+             data.moderatedPublished is bool;
+    }
+
+    // --- Collection Rules ---
+
+    match /admins/{adminUid} {
+      allow get: if isValidId(adminUid) && (isOwner(adminUid) || isBootstrappedAdmin());
+      allow list: if isBootstrappedAdmin();
+      allow create: if isBootstrappedAdmin() && isValidId(adminUid) &&
+                       incoming().uid == adminUid &&
+                       incoming().keys().hasAll(['uid', 'email', 'grantedBy', 'createdAt']) &&
+                       incoming().keys().hasOnly(['uid', 'email', 'grantedBy', 'createdAt']) &&
+                       isValidAdmin(incoming()) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time;
+      allow update: if false;
+      allow delete: if isBootstrappedAdmin() && isValidId(adminUid);
+    }
+
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isOwner(userId) || isBootstrappedAdmin();
+
+      // Prevent self-assigned official roles on creation
+      allow create: if isOwner(userId) && isValidId(userId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().role == 'CITIZEN' &&
+                       incoming().verificationStatus == 'VERIFIED' &&
+                       incoming().keys().hasAll(['userId', 'displayName', 'email', 'role', 'verificationStatus', 'districtId', 'mandalId', 'villageId', 'wardId', 'preferredLang', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'displayName', 'email', 'role', 'verificationStatus', 'officialWorkId', 'department', 'districtId', 'mandalId', 'villageId', 'wardId', 'preferredLang', 'createdAt', 'updatedAt']) &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time;
+
+      allow update: if isSignedIn() && isValidId(userId) &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       (
+                         (isOwner(userId) &&
+                          incoming().role == existing().role &&
+                          incoming().verificationStatus == existing().verificationStatus &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'districtId', 'mandalId', 'villageId', 'wardId', 'preferredLang', 'updatedAt'])) ||
+                         (isAdmin() &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['role', 'verificationStatus', 'officialWorkId', 'department', 'districtId', 'mandalId', 'villageId', 'wardId', 'updatedAt']))
+                       );
+
+      allow delete: if isAdmin() && isValidId(userId);
+
+      // User-scoped scheme applications
+      match /schemeApplications/{applicationId} {
+        allow get: if isValidId(userId) && isValidId(applicationId) && (isOwner(userId) || isAdmin());
+        allow list: if isValidId(userId) && (isOwner(userId) || isBootstrappedAdmin());
+
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(applicationId) &&
+                         incoming().userId == userId &&
+                         incoming().verificationStatus == 'PENDING_VERIFICATION' &&
+                         incoming().applicationStatus == 'SUBMITTED' &&
+                         incoming().keys().hasAll(['userId', 'schemeId', 'schemeTitle', 'referenceNumber', 'villageName', 'verificationStatus', 'applicationStatus', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'schemeId', 'schemeTitle', 'referenceNumber', 'villageName', 'verificationStatus', 'applicationStatus', 'remarks', 'createdAt', 'updatedAt']) &&
+                         isValidSchemeApplication(incoming()) &&
+                         incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                         incoming().updatedAt is timestamp && incoming().updatedAt <= request.time;
+
+        allow update: if isSignedIn() && isValidId(userId) && isValidId(applicationId) &&
+                         isValidSchemeApplication(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                         (
+                           (isOwner(userId) &&
+                            incoming().verificationStatus == existing().verificationStatus &&
+                            incoming().applicationStatus == existing().applicationStatus &&
+                            incoming().diff(existing()).affectedKeys().hasOnly(['remarks', 'updatedAt'])) ||
+                           (isAdmin() &&
+                            incoming().diff(existing()).affectedKeys().hasOnly(['verificationStatus', 'applicationStatus', 'remarks', 'updatedAt']))
+                         );
+
+        allow delete: if isValidId(userId) && isValidId(applicationId) && (isOwner(userId) || isAdmin());
+      }
+
+      // User-scoped ration records
+      match /rationRecords/{recordId} {
+        allow get: if isValidId(userId) && isValidId(recordId) && (isOwner(userId) || isAdmin());
+        allow list: if isValidId(userId) && (isOwner(userId) || isBootstrappedAdmin());
+
+        allow create: if isValidId(userId) && isValidId(recordId) && (isOwner(userId) || isAdmin()) &&
+                         incoming().userId == userId &&
+                         incoming().keys().hasAll(['userId', 'cardReference', 'shopCode', 'monthLabel', 'entitledRiceKg', 'receivedRiceKg', 'distributionStatus', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'cardReference', 'shopCode', 'monthLabel', 'entitledRiceKg', 'receivedRiceKg', 'distributionStatus', 'createdAt', 'updatedAt']) &&
+                         isValidRationRecord(incoming()) &&
+                         incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                         incoming().updatedAt is timestamp && incoming().updatedAt <= request.time;
+
+        allow update: if isValidId(userId) && isValidId(recordId) && (isOwner(userId) || isAdmin()) &&
+                         isValidRationRecord(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['receivedRiceKg', 'distributionStatus', 'updatedAt']);
+
+        allow delete: if isValidId(userId) && isValidId(recordId) && (isOwner(userId) || isAdmin());
+      }
+
+      // User-scoped notifications
+      match /notifications/{notificationId} {
+        allow get: if isValidId(userId) && isValidId(notificationId) && (isOwner(userId) || isAdmin());
+        allow list: if isValidId(userId) && (isOwner(userId) || isBootstrappedAdmin());
+
+        allow create: if isValidId(userId) && isValidId(notificationId) && (isOwner(userId) || isAdmin()) &&
+                         incoming().userId == userId &&
+                         incoming().keys().hasAll(['userId', 'title', 'message', 'relatedId', 'notificationType', 'readStatus', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'title', 'message', 'relatedId', 'notificationType', 'readStatus', 'createdAt', 'updatedAt']) &&
+                         isValidNotification(incoming()) &&
+                         incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                         incoming().updatedAt is timestamp && incoming().updatedAt <= request.time;
+
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(notificationId) &&
+                         isValidNotification(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['readStatus', 'updatedAt']);
+
+        allow delete: if isValidId(userId) && isValidId(notificationId) && (isOwner(userId) || isAdmin());
+      }
+    }
+
+    match /roleRequests/{requestId} {
+      allow get: if isSignedIn() && isValidId(requestId) && (existing().userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isBootstrappedAdmin());
+
+      allow create: if isSignedIn() && isValidId(requestId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().status == 'PENDING' &&
+                       incoming().keys().hasAll(['userId', 'applicantName', 'requestedRole', 'officialWorkId', 'department', 'districtId', 'mandalId', 'villageId', 'wardId', 'status', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'applicantName', 'requestedRole', 'officialWorkId', 'department', 'districtId', 'mandalId', 'villageId', 'wardId', 'status', 'reviewerNotes', 'createdAt', 'updatedAt']) &&
+                       isValidRoleRequest(incoming()) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time;
+
+      allow update: if isAdmin() && isValidId(requestId) &&
+                       existing().status == 'PENDING' &&
+                       isValidRoleRequest(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['status', 'reviewerNotes', 'updatedAt']);
+
+      allow delete: if isValidId(requestId) && (isAdmin() || (isSignedIn() && existing().userId == request.auth.uid && existing().status == 'PENDING'));
+    }
+
+    match /complaints/{complaintId} {
+      allow get: if isSignedIn() && isValidId(complaintId) && (
+        existing().citizenId == request.auth.uid ||
+        existing().assignedWorkerId == request.auth.uid ||
+        existing().assignedOfficerId == request.auth.uid ||
+        (existing().authorizedUids is list && request.auth.uid in existing().authorizedUids) ||
+        isAdmin()
+      );
+
+      allow list: if isSignedIn() && (
+        resource.data.citizenId == request.auth.uid ||
+        resource.data.assignedWorkerId == request.auth.uid ||
+        resource.data.assignedOfficerId == request.auth.uid ||
+        (resource.data.authorizedUids is list && request.auth.uid in resource.data.authorizedUids) ||
+        isBootstrappedAdmin()
+      );
+
+      allow create: if isSignedIn() && isValidId(complaintId) &&
+                       incoming().citizenId == request.auth.uid &&
+                       request.auth.uid in incoming().authorizedUids &&
+                       incoming().status == 'SUBMITTED' &&
+                       incoming().currentStage == 'CITIZEN' &&
+                       incoming().keys().hasAll(['trackingCode', 'citizenId', 'citizenName', 'title', 'description', 'category', 'subCategory', 'priority', 'status', 'currentStage', 'districtId', 'districtName', 'mandalId', 'mandalName', 'villageId', 'villageName', 'wardId', 'estimatedCostInr', 'fundsRequired', 'authorizedUids', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['trackingCode', 'citizenId', 'citizenName', 'title', 'description', 'category', 'subCategory', 'priority', 'status', 'currentStage', 'districtId', 'districtName', 'mandalId', 'mandalName', 'villageId', 'villageName', 'wardId', 'latitude', 'longitude', 'assignedOfficerId', 'assignedWorkerId', 'assignedWorkerName', 'estimatedCostInr', 'fundsRequired', 'fundRequestId', 'latestActionNote', 'aiSummary', 'photoUriString', 'authorizedUids', 'createdAt', 'updatedAt']) &&
+                       isValidComplaint(incoming()) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time;
+
+      allow update: if isSignedIn() && isValidId(complaintId) &&
+                       isValidComplaint(incoming()) &&
+                       incoming().citizenId == existing().citizenId &&
+                       incoming().trackingCode == existing().trackingCode &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       (
+                         isAdmin() ||
+                         (
+                           existing().status != 'RESOLVED' && existing().status != 'REJECTED' &&
+                           (
+                             (isVerifiedOfficer() &&
+                              incoming().diff(existing()).affectedKeys().hasOnly(['status', 'currentStage', 'priority', 'assignedOfficerId', 'assignedWorkerId', 'assignedWorkerName', 'estimatedCostInr', 'fundsRequired', 'fundRequestId', 'latestActionNote', 'aiSummary', 'authorizedUids', 'updatedAt'])) ||
+                             (existing().assignedWorkerId == request.auth.uid &&
+                              incoming().status in ['IN_PROGRESS', 'COMPLETED_PENDING_VERIFY'] &&
+                              incoming().diff(existing()).affectedKeys().hasOnly(['status', 'currentStage', 'latestActionNote', 'updatedAt'])) ||
+                             (existing().citizenId == request.auth.uid &&
+                              incoming().status == existing().status &&
+                              incoming().currentStage == existing().currentStage &&
+                              incoming().diff(existing()).affectedKeys().hasOnly(['aiSummary', 'photoUriString', 'updatedAt']))
+                           )
+                         )
+                       );
+
+      allow delete: if isAdmin() && isValidId(complaintId);
+
+      match /history/{historyId} {
+        allow get: if isSignedIn() && isValidId(complaintId) && isValidId(historyId) && (
+          existing().citizenId == request.auth.uid ||
+          existing().actorId == request.auth.uid ||
+          (existing().authorizedUids is list && request.auth.uid in existing().authorizedUids) ||
+          isAdmin()
+        );
+
+        allow list: if isSignedIn() && isValidId(complaintId) && (
+          resource.data.citizenId == request.auth.uid ||
+          resource.data.actorId == request.auth.uid ||
+          (resource.data.authorizedUids is list && request.auth.uid in resource.data.authorizedUids) ||
+          isBootstrappedAdmin()
+        );
+
+        allow create: if isSignedIn() && isValidId(complaintId) && isValidId(historyId) &&
+                         exists(/databases/$(database)/documents/complaints/$(complaintId)) &&
+                         incoming().complaintId == complaintId &&
+                         incoming().actorId == request.auth.uid &&
+                         incoming().keys().hasAll(['complaintId', 'citizenId', 'actorId', 'actorName', 'actorRole', 'actionType', 'fromStage', 'toStage', 'remarks', 'authorizedUids', 'createdAt']) &&
+                         incoming().keys().hasOnly(['complaintId', 'citizenId', 'actorId', 'actorName', 'actorRole', 'actionType', 'fromStage', 'toStage', 'remarks', 'authorizedUids', 'createdAt']) &&
+                         isValidComplaintHistory(incoming()) &&
+                         incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                         (
+                           get(/databases/$(database)/documents/complaints/$(complaintId)).data.citizenId == request.auth.uid ||
+                           get(/databases/$(database)/documents/complaints/$(complaintId)).data.assignedWorkerId == request.auth.uid ||
+                           isVerifiedOfficer() ||
+                           isAdmin()
+                         );
+
+        allow update, delete: if false;
+      }
+    }
+
+    match /fundRequests/{fundRequestId} {
+      allow get: if isSignedIn() && isValidId(fundRequestId) && (
+        existing().requesterId == request.auth.uid ||
+        (existing().reviewerUids is list && request.auth.uid in existing().reviewerUids) ||
+        isAdmin()
+      );
+
+      allow list: if isSignedIn() && (
+        resource.data.requesterId == request.auth.uid ||
+        (resource.data.reviewerUids is list && request.auth.uid in resource.data.reviewerUids) ||
+        isBootstrappedAdmin()
+      );
+
+      allow create: if isSignedIn() && isValidId(fundRequestId) &&
+                       (isVerifiedOfficer() || isAdmin()) &&
+                       incoming().requesterId == request.auth.uid &&
+                       incoming().status == 'REQUESTED' &&
+                       incoming().sanctionedAmountInr == 0 &&
+                       incoming().expenditureInr == 0 &&
+                       incoming().keys().hasAll(['complaintId', 'projectTitle', 'requesterId', 'requesterName', 'department', 'districtId', 'mandalId', 'villageId', 'fundSource', 'estimatedCostInr', 'requestedAmountInr', 'sanctionedAmountInr', 'expenditureInr', 'approvalStage', 'status', 'reviewerUids', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['complaintId', 'projectTitle', 'requesterId', 'requesterName', 'department', 'districtId', 'mandalId', 'villageId', 'fundSource', 'estimatedCostInr', 'requestedAmountInr', 'sanctionedAmountInr', 'expenditureInr', 'approvalStage', 'status', 'remarks', 'reviewerUids', 'createdAt', 'updatedAt']) &&
+                       isValidFundRequest(incoming()) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time;
+
+      allow update: if isSignedIn() && isValidId(fundRequestId) &&
+                       isValidFundRequest(incoming()) &&
+                       incoming().requesterId == existing().requesterId &&
+                       incoming().complaintId == existing().complaintId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       (
+                         isAdmin() ||
+                         (
+                           existing().status != 'COMPLETED' && existing().status != 'REJECTED' &&
+                           isVerifiedOfficer() &&
+                           incoming().diff(existing()).affectedKeys().hasOnly(['approvalStage', 'status', 'sanctionedAmountInr', 'expenditureInr', 'remarks', 'reviewerUids', 'updatedAt'])
+                         )
+                       );
+
+      allow delete: if isAdmin() && isValidId(fundRequestId);
+    }
+
+    match /publicProjects/{projectId} {
+      allow get: if isSignedIn() && isValidId(projectId) && (existing().published == true || isAdmin());
+      allow list: if isSignedIn() && (resource.data.published == true || isBootstrappedAdmin());
+
+      allow create: if isSignedIn() && isValidId(projectId) &&
+                       (isVerifiedOfficer() || isAdmin()) &&
+                       incoming().createdBy == request.auth.uid &&
+                       incoming().keys().hasAll(['title', 'department', 'districtId', 'districtName', 'mandalName', 'villageName', 'sanctionedAmountInr', 'expenditureInr', 'progressPercent', 'status', 'summary', 'published', 'createdBy', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['title', 'department', 'districtId', 'districtName', 'mandalName', 'villageName', 'sanctionedAmountInr', 'expenditureInr', 'progressPercent', 'status', 'summary', 'published', 'createdBy', 'createdAt', 'updatedAt']) &&
+                       isValidPublicProject(incoming()) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time;
+
+      allow update: if isSignedIn() && isValidId(projectId) &&
+                       (isVerifiedOfficer() || isAdmin()) &&
+                       isValidPublicProject(incoming()) &&
+                       incoming().createdBy == existing().createdBy &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['expenditureInr', 'progressPercent', 'status', 'summary', 'published', 'updatedAt']);
+
+      allow delete: if isAdmin() && isValidId(projectId);
+    }
+
+    match /schemes/{schemeId} {
+      allow get: if isSignedIn() && isValidId(schemeId) && (existing().published == true || isAdmin());
+      allow list: if isSignedIn() && (resource.data.published == true || isBootstrappedAdmin());
+
+      allow create: if isAdmin() && isValidId(schemeId) &&
+                       incoming().keys().hasAll(['title', 'level', 'department', 'category', 'activeStatus', 'benefitsSummary', 'eligibilityCriteria', 'requiredDocuments', 'applicationProcess', 'beneficiaryCount', 'published', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['title', 'level', 'department', 'category', 'activeStatus', 'benefitsSummary', 'eligibilityCriteria', 'requiredDocuments', 'applicationProcess', 'applicationDeadline', 'beneficiaryCount', 'published', 'createdAt', 'updatedAt']) &&
+                       isValidGovernmentScheme(incoming()) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time;
+
+      allow update: if isAdmin() && isValidId(schemeId) &&
+                       isValidGovernmentScheme(incoming()) &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['title', 'activeStatus', 'benefitsSummary', 'eligibilityCriteria', 'requiredDocuments', 'applicationProcess', 'applicationDeadline', 'beneficiaryCount', 'published', 'updatedAt']);
+
+      allow delete: if isAdmin() && isValidId(schemeId);
+    }
+
+    match /rationSummaries/{summaryId} {
+      allow get: if isSignedIn() && isValidId(summaryId) && (existing().publicSummary == true || isAdmin());
+      allow list: if isSignedIn() && (resource.data.publicSummary == true || isBootstrappedAdmin());
+
+      allow create: if isSignedIn() && isValidId(summaryId) &&
+                       (isVerifiedOfficer() || isAdmin()) &&
+                       incoming().keys().hasAll(['shopCode', 'districtId', 'mandalName', 'villageName', 'monthLabel', 'activeCards', 'allocatedRiceKg', 'distributedRiceKg', 'pendingComplaints', 'publicSummary', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['shopCode', 'districtId', 'mandalName', 'villageName', 'monthLabel', 'activeCards', 'allocatedRiceKg', 'distributedRiceKg', 'pendingComplaints', 'publicSummary', 'createdAt', 'updatedAt']) &&
+                       isValidRationSummary(incoming()) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time;
+
+      allow update: if isSignedIn() && isValidId(summaryId) &&
+                       (isVerifiedOfficer() || isAdmin()) &&
+                       isValidRationSummary(incoming()) &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['activeCards', 'allocatedRiceKg', 'distributedRiceKg', 'pendingComplaints', 'publicSummary', 'updatedAt']);
+
+      allow delete: if isAdmin() && isValidId(summaryId);
+    }
+
+    match /feedback/{feedbackId} {
+      allow get: if isSignedIn() && isValidId(feedbackId) && (
+        existing().citizenId == request.auth.uid ||
+        existing().moderatedPublished == true ||
+        isAdmin()
+      );
+
+      allow list: if isSignedIn() && (
+        resource.data.citizenId == request.auth.uid ||
+        resource.data.moderatedPublished == true ||
+        isBootstrappedAdmin()
+      );
+
+      allow create: if isSignedIn() && isValidId(feedbackId) &&
+                       incoming().citizenId == request.auth.uid &&
+                       incoming().keys().hasAll(['citizenId', 'targetId', 'targetTitle', 'targetType', 'districtName', 'villageName', 'rating', 'comment', 'moderatedPublished', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['citizenId', 'targetId', 'targetTitle', 'targetType', 'districtName', 'villageName', 'rating', 'comment', 'moderatedPublished', 'createdAt', 'updatedAt']) &&
+                       isValidFeedback(incoming()) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time;
+
+      allow update: if isSignedIn() && isValidId(feedbackId) &&
+                       isValidFeedback(incoming()) &&
+                       incoming().citizenId == existing().citizenId &&
+                       incoming().targetId == existing().targetId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       (
+                         (existing().citizenId == request.auth.uid &&
+                          incoming().moderatedPublished == existing().moderatedPublished &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['rating', 'comment', 'updatedAt'])) ||
+                         (isAdmin() &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['moderatedPublished', 'updatedAt']))
+                       );
+
+      allow delete: if isValidId(feedbackId) && (isAdmin() || (isSignedIn() && existing().citizenId == request.auth.uid));
+    }
+  }
+}

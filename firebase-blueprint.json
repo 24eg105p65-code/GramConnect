@@ -1,0 +1,335 @@
+{
+  "entities": {
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Authorized central government administrator entry",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID of the administrator" },
+        "email": { "type": "string", "description": "Verified administrator email" },
+        "grantedBy": { "type": "string", "description": "UID or email of granting authority" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp when admin access was granted" }
+      },
+      "required": ["uid", "email", "grantedBy", "createdAt"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "GramConnect stakeholder profile with role, department, and Telangana geographical jurisdiction",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "role": {
+          "type": "string",
+          "enum": ["CITIZEN", "WARD_REP", "SARPANCH", "VILLAGE_OFFICER", "MANDAL_OFFICER", "MANDAL_HEAD", "DISTRICT_OFFICER", "DISTRICT_HEAD", "FIELD_WORKER", "GOVT_ADMIN"]
+        },
+        "verificationStatus": { "type": "string", "enum": ["VERIFIED", "PENDING_VERIFICATION", "SUSPENDED"] },
+        "officialWorkId": { "type": "string" },
+        "department": { "type": "string" },
+        "districtId": { "type": "string" },
+        "mandalId": { "type": "string" },
+        "villageId": { "type": "string" },
+        "wardId": { "type": "string" },
+        "preferredLang": { "type": "string", "enum": ["EN", "TE"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "displayName", "email", "role", "verificationStatus", "districtId", "mandalId", "villageId", "wardId", "preferredLang", "createdAt", "updatedAt"]
+    },
+    "RoleRequest": {
+      "title": "RoleRequest",
+      "description": "Official government officer, ward representative, sarpanch, or field worker verification request",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "applicantName": { "type": "string" },
+        "requestedRole": { "type": "string" },
+        "officialWorkId": { "type": "string" },
+        "department": { "type": "string" },
+        "districtId": { "type": "string" },
+        "mandalId": { "type": "string" },
+        "villageId": { "type": "string" },
+        "wardId": { "type": "string" },
+        "status": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED"] },
+        "reviewerNotes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "applicantName", "requestedRole", "officialWorkId", "department", "districtId", "mandalId", "villageId", "wardId", "status", "createdAt", "updatedAt"]
+    },
+    "Complaint": {
+      "title": "Complaint",
+      "description": "Traceable village-to-state public grievance, scheme, or ration complaint",
+      "type": "object",
+      "properties": {
+        "trackingCode": { "type": "string" },
+        "citizenId": { "type": "string" },
+        "citizenName": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "subCategory": { "type": "string" },
+        "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+        "status": { "type": "string" },
+        "currentStage": { "type": "string" },
+        "districtId": { "type": "string" },
+        "districtName": { "type": "string" },
+        "mandalId": { "type": "string" },
+        "mandalName": { "type": "string" },
+        "villageId": { "type": "string" },
+        "villageName": { "type": "string" },
+        "wardId": { "type": "string" },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "assignedOfficerId": { "type": "string" },
+        "assignedWorkerId": { "type": "string" },
+        "assignedWorkerName": { "type": "string" },
+        "estimatedCostInr": { "type": "integer" },
+        "fundsRequired": { "type": "boolean" },
+        "fundRequestId": { "type": "string" },
+        "latestActionNote": { "type": "string" },
+        "aiSummary": { "type": "string" },
+        "photoUriString": { "type": "string" },
+        "authorizedUids": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["trackingCode", "citizenId", "citizenName", "title", "description", "category", "subCategory", "priority", "status", "currentStage", "districtId", "districtName", "mandalId", "mandalName", "villageId", "villageName", "wardId", "estimatedCostInr", "fundsRequired", "authorizedUids", "createdAt", "updatedAt"]
+    },
+    "ComplaintHistory": {
+      "title": "ComplaintHistory",
+      "description": "Immutable audit history entry for a complaint transition",
+      "type": "object",
+      "properties": {
+        "complaintId": { "type": "string" },
+        "citizenId": { "type": "string" },
+        "actorId": { "type": "string" },
+        "actorName": { "type": "string" },
+        "actorRole": { "type": "string" },
+        "actionType": { "type": "string" },
+        "fromStage": { "type": "string" },
+        "toStage": { "type": "string" },
+        "remarks": { "type": "string" },
+        "authorizedUids": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["complaintId", "citizenId", "actorId", "actorName", "actorRole", "actionType", "fromStage", "toStage", "remarks", "authorizedUids", "createdAt"]
+    },
+    "FundRequest": {
+      "title": "FundRequest",
+      "description": "Public fund request and expenditure tracking record",
+      "type": "object",
+      "properties": {
+        "complaintId": { "type": "string" },
+        "projectTitle": { "type": "string" },
+        "requesterId": { "type": "string" },
+        "requesterName": { "type": "string" },
+        "department": { "type": "string" },
+        "districtId": { "type": "string" },
+        "mandalId": { "type": "string" },
+        "villageId": { "type": "string" },
+        "fundSource": { "type": "string" },
+        "estimatedCostInr": { "type": "integer" },
+        "requestedAmountInr": { "type": "integer" },
+        "sanctionedAmountInr": { "type": "integer" },
+        "expenditureInr": { "type": "integer" },
+        "approvalStage": { "type": "string" },
+        "status": { "type": "string" },
+        "remarks": { "type": "string" },
+        "reviewerUids": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["complaintId", "projectTitle", "requesterId", "requesterName", "department", "districtId", "mandalId", "villageId", "fundSource", "estimatedCostInr", "requestedAmountInr", "sanctionedAmountInr", "expenditureInr", "approvalStage", "status", "reviewerUids", "createdAt", "updatedAt"]
+    },
+    "PublicProject": {
+      "title": "PublicProject",
+      "description": "Publicly disclosable village, mandal, or district development project",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "department": { "type": "string" },
+        "districtId": { "type": "string" },
+        "districtName": { "type": "string" },
+        "mandalName": { "type": "string" },
+        "villageName": { "type": "string" },
+        "sanctionedAmountInr": { "type": "integer" },
+        "expenditureInr": { "type": "integer" },
+        "progressPercent": { "type": "integer" },
+        "status": { "type": "string" },
+        "summary": { "type": "string" },
+        "published": { "type": "boolean" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "department", "districtId", "districtName", "mandalName", "villageName", "sanctionedAmountInr", "expenditureInr", "progressPercent", "status", "summary", "published", "createdBy", "createdAt", "updatedAt"]
+    },
+    "GovernmentScheme": {
+      "title": "GovernmentScheme",
+      "description": "Officially verified Central or Telangana State welfare scheme",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "level": { "type": "string", "enum": ["CENTRAL", "TELANGANA_STATE"] },
+        "department": { "type": "string" },
+        "category": { "type": "string" },
+        "activeStatus": { "type": "string", "enum": ["ACTIVE", "INACTIVE"] },
+        "benefitsSummary": { "type": "string" },
+        "eligibilityCriteria": { "type": "string" },
+        "requiredDocuments": { "type": "string" },
+        "applicationProcess": { "type": "string" },
+        "beneficiaryCount": { "type": "integer" },
+        "published": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "level", "department", "category", "activeStatus", "benefitsSummary", "eligibilityCriteria", "requiredDocuments", "applicationProcess", "beneficiaryCount", "published", "createdAt", "updatedAt"]
+    },
+    "RationSummary": {
+      "title": "RationSummary",
+      "description": "Aggregated non-PII village and fair price shop monthly PDS distribution summary",
+      "type": "object",
+      "properties": {
+        "shopCode": { "type": "string" },
+        "districtId": { "type": "string" },
+        "mandalName": { "type": "string" },
+        "villageName": { "type": "string" },
+        "monthLabel": { "type": "string" },
+        "activeCards": { "type": "integer" },
+        "allocatedRiceKg": { "type": "integer" },
+        "distributedRiceKg": { "type": "integer" },
+        "pendingComplaints": { "type": "integer" },
+        "publicSummary": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["shopCode", "districtId", "mandalName", "villageName", "monthLabel", "activeCards", "allocatedRiceKg", "distributedRiceKg", "pendingComplaints", "publicSummary", "createdAt", "updatedAt"]
+    },
+    "SchemeApplication": {
+      "title": "SchemeApplication",
+      "description": "Citizen's personal government scheme application tracking record",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "schemeId": { "type": "string" },
+        "schemeTitle": { "type": "string" },
+        "referenceNumber": { "type": "string" },
+        "villageName": { "type": "string" },
+        "verificationStatus": { "type": "string" },
+        "applicationStatus": { "type": "string" },
+        "remarks": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "schemeId", "schemeTitle", "referenceNumber", "villageName", "verificationStatus", "applicationStatus", "createdAt", "updatedAt"]
+    },
+    "RationRecord": {
+      "title": "RationRecord",
+      "description": "Citizen's personal PDS ration card entitlement and distribution log",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "cardReference": { "type": "string" },
+        "shopCode": { "type": "string" },
+        "monthLabel": { "type": "string" },
+        "entitledRiceKg": { "type": "integer" },
+        "receivedRiceKg": { "type": "integer" },
+        "distributionStatus": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "cardReference", "shopCode", "monthLabel", "entitledRiceKg", "receivedRiceKg", "distributionStatus", "createdAt", "updatedAt"]
+    },
+    "NotificationItem": {
+      "title": "NotificationItem",
+      "description": "User-scoped in-app governance notification",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "relatedId": { "type": "string" },
+        "notificationType": { "type": "string" },
+        "readStatus": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "message", "relatedId", "notificationType", "readStatus", "createdAt", "updatedAt"]
+    },
+    "CitizenFeedback": {
+      "title": "CitizenFeedback",
+      "description": "Verified citizen feedback on complaint resolution, public works, and accountability",
+      "type": "object",
+      "properties": {
+        "citizenId": { "type": "string" },
+        "targetId": { "type": "string" },
+        "targetTitle": { "type": "string" },
+        "targetType": { "type": "string" },
+        "districtName": { "type": "string" },
+        "villageName": { "type": "string" },
+        "rating": { "type": "integer" },
+        "comment": { "type": "string" },
+        "moderatedPublished": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["citizenId", "targetId", "targetTitle", "targetType", "districtName", "villageName", "rating", "comment", "moderatedPublished", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/admins/{adminUid}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Central Government Administrators"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Stakeholder user profiles and geographical jurisdictions"
+    },
+    "/roleRequests/{requestId}": {
+      "schema": { "$ref": "#/entities/RoleRequest" },
+      "description": "Pending official role and jurisdiction verification requests"
+    },
+    "/complaints/{complaintId}": {
+      "schema": { "$ref": "#/entities/Complaint" },
+      "description": "Village-to-State public grievances and welfare/ration complaints"
+    },
+    "/complaints/{complaintId}/history/{historyId}": {
+      "schema": { "$ref": "#/entities/ComplaintHistory" },
+      "description": "Immutable complaint transition and escalation history"
+    },
+    "/fundRequests/{fundRequestId}": {
+      "schema": { "$ref": "#/entities/FundRequest" },
+      "description": "Public fund requests, approvals, allocations, and expenditure tracking"
+    },
+    "/publicProjects/{projectId}": {
+      "schema": { "$ref": "#/entities/PublicProject" },
+      "description": "Published public village development projects and transparency records"
+    },
+    "/schemes/{schemeId}": {
+      "schema": { "$ref": "#/entities/GovernmentScheme" },
+      "description": "Officially verified Central and Telangana State welfare schemes"
+    },
+    "/rationSummaries/{summaryId}": {
+      "schema": { "$ref": "#/entities/RationSummary" },
+      "description": "Non-PII village and ration shop monthly PDS distribution summaries"
+    },
+    "/users/{userId}/schemeApplications/{applicationId}": {
+      "schema": { "$ref": "#/entities/SchemeApplication" },
+      "description": "User-scoped scheme application tracking records"
+    },
+    "/users/{userId}/rationRecords/{recordId}": {
+      "schema": { "$ref": "#/entities/RationRecord" },
+      "description": "User-scoped PDS ration entitlement and distribution logs"
+    },
+    "/users/{userId}/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/NotificationItem" },
+      "description": "User-scoped in-app governance notifications"
+    },
+    "/feedback/{feedbackId}": {
+      "schema": { "$ref": "#/entities/CitizenFeedback" },
+      "description": "Citizen feedback and public accountability reviews"
+    }
+  }
+}
